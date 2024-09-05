@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadlock Map</title>
+    <style>
+        /* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+        html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        b, u, i, center,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed,
+        figure, figcaption, footer, header, hgroup,
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+        /* HTML5 display-role reset for older browsers */
+        article, aside, details, figcaption, figure,
+        footer, header, hgroup, menu, nav, section {
+            display: block;
+        }
+        body {
+            line-height: 1;
+        }
+        ol, ul {
+            list-style: none;
+        }
+        blockquote, q {
+            quotes: none;
+        }
+        blockquote:before, blockquote:after,
+        q:before, q:after {
+            content: '';
+            content: none;
+        }
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Initialize the map
+    var map = L.map('map', {
+        crs: L.CRS.Simple,
+        minZoom: -4,
+        maxZoom: 2
+    });
+
+    var bounds = [[0, 0], [1000, 1000]];
+    var image = L.imageOverlay('images/map_bg_nolines_png-transformed-no.png', bounds).addTo(map);
+    map.fitBounds(bounds);
+
+    const lines = [
+        { coordinates: [[41,471],[97,469],[168,406],[226,303],[249,227],[281,184],[345,174],[399,127],[495,131],[589,176],[684,158],[757,205],[833,406],[899,467],[954,468]], color: 'yellow', popup: 'Yellow line (Solo)'},
+        { coordinates: [[56,487],[126,486],[182,467],[244,467],[265,427],[319,416],[385,346],[440,345],[507,351],[562,411],[625,416],[674,373],[747,446],[811,460],[864,483],[940,483]], color: 'orange', popup: 'Orange line (Duo)'},
+        { coordinates: [[56,514],[128,513],[179,534],[244,546],[319,625],[370,583],[432,581],[495,621],[554,652],[608,655],[676,583],[729,572],[751,530],[808,531],[863,511],[937,513]], color: 'blue', popup: 'Blue line (Duo)'},
+        { coordinates: [[42,531],[95,531],[165,592],[240,792],[306,837],[401,824],[505,840],[597,872],[641,829],[711,815],[747,776],[771,702],[824,599],[896,531],[951,529]], color: 'purple', popup: 'Purple line (Solo)'},
+    ];
+
+    const lLines = [];
+    lines.forEach(function(line) {
+        lLines.push(L.polyline(line.coordinates, {color: line.color}).bindPopup(line.popup));
+    });
+    var lineGroup = L.layerGroup(lLines);
+    // show lines by default
+    map.addLayer(lineGroup);
+    // Example Layer 2: Strategic Zones
+    var strategicZones = L.layerGroup([
+        L.circle([300, 300], {radius: 100, color: 'green'}).bindPopup('Zone 1'),
+        L.circle([600, 600], {radius: 150, color: 'orange'}).bindPopup('Zone 2')
+    ]);
+
+
+    const t1 = [[405, 135], [441, 346], [362, 591], [395, 832]];
+    const t1Enemy = [[586, 194], [624, 427], [551, 673], [589, 883]];
+    const t2 = [[244, 184], [304, 419], [276, 596], [225, 799]];
+    const t2Enemy = [[761, 215], [717, 419], [747,849], [696,620]];
+    const t3 = [[149, 412], [160, 425], [188, 460], [193, 480], [191, 529], [194, 553], [162, 597], [152, 611]];
+    const t3Enemy = [[833, 411], [823, 426], [801, 458], [797, 477], [796, 534], [797, 551], [818, 594], [829, 609]];
+    const shops = [[384, 109], [432, 388], [365, 461], [376, 624], [397, 788], [610, 558]];
+    const shrines = [[107, 444], [114, 567]];
+    const patron = [110, 508];
+    const enemyShrines = [[879, 445], [879, 570]];
+    const enemyPatron = [880, 510];
+    const towers = [];
+    t1.forEach((coord, i) => towers.push(L.marker(coord).bindPopup(`T1 - Guardian ${i}`)));
+    t1Enemy.forEach((coord, i) => towers.push(L.marker(coord, {color: 'red'}).bindPopup(`T1 - Enemy Guardian ${i}`)));
+    t2.forEach((coord, i) => towers.push(L.marker(coord).bindPopup(`T2 - Walker ${i}`)));
+    t2Enemy.forEach((coord, i) => towers.push(L.marker(coord, {color: 'red'}).bindPopup(`T2 - Enemy Walker ${i}`)));
+    t3.forEach((coord, i) => towers.push(L.marker(coord).bindPopup(`T3 - Base Guardian ${i}`)));
+    t3Enemy.forEach((coord, i) => towers.push(L.marker(coord, {color: 'red'}).bindPopup(`T3 - Base Guardian ${i}`)));
+    shrines.forEach((coord, i) => towers.push(L.marker(coord).bindPopup(`Shrine ${i}`)));
+    enemyShrines.forEach((coord, i) => towers.push(L.marker(coord, {color: 'red'}).bindPopup(`Enemy Shrine ${i}`)));
+    towers.push(L.marker(patron).bindPopup('Patron'));
+    towers.push(L.marker(enemyPatron, {color: 'red'}).bindPopup('Enemy Patron'));
+    var towersLayer = L.layerGroup([
+        ...towers,
+    ]);
+
+    var shopsLayer = L.layerGroup(
+        shops.map((coord, i) => L.marker(coord).bindPopup(`Shop ${i}`))
+    );
+
+    const overlayMaps = {
+        "Lines": lineGroup,
+        "Objectives (Towers)": towersLayer,
+        "Shops": shopsLayer
+    };
+
+
+    L.control.layers(null, overlayMaps).addTo(map);
+</script>
+</body>
+</html>

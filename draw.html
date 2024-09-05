@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadlock Map</title>
+    <style>
+        /* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+        html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        b, u, i, center,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed,
+        figure, figcaption, footer, header, hgroup,
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+        /* HTML5 display-role reset for older browsers */
+        article, aside, details, figcaption, figure,
+        footer, header, hgroup, menu, nav, section {
+            display: block;
+        }
+        body {
+            line-height: 1;
+        }
+        ol, ul {
+            list-style: none;
+        }
+        blockquote, q {
+            quotes: none;
+        }
+        blockquote:before, blockquote:after,
+        q:before, q:after {
+            content: '';
+            content: none;
+        }
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+            background-image: url('images/map_bg_nolines_png-transformed-no.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+        }
+
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+    <!-- Add leaflet.js and leaflet.draw JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+</head>
+<body>
+<div id="map"></div>
+<!-- Add leaflet.draw CSS -->
+
+
+<script>
+    // Initialize the map
+    var map = L.map('map', {
+        crs: L.CRS.Simple,
+        minZoom: -4,
+        maxZoom: 2,
+        zoomSnap: 0.1,
+        zoomDelta: 0.1
+    });
+
+    var bounds = [[0, 0], [1000, 1000]];
+    var image = L.imageOverlay('images/Deadlock-map.webp', bounds, {opacity: 0.5}).addTo(map);
+    map.fitBounds(bounds);
+
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    var drawControl = new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems,
+            remove: true
+        },
+        draw: {
+            polygon: false,
+            rectangle: false,
+            circle: false,
+            circlemarker: false,
+            polyline: true,  // Allow drawing lines
+            marker: true     // Allow drawing points
+        }
+    });
+    map.addControl(drawControl);
+
+    // Capture the draw events
+    map.on(L.Draw.Event.CREATED, function (event) {
+        var layer = event.layer;
+        drawnItems.addLayer(layer);
+
+        // Add markers at each vertex of the polyline with smaller size
+        if (layer instanceof L.Polyline) {
+            layer.getLatLngs().forEach(function(latlng) {
+                L.circleMarker(latlng, {
+                    radius: 3,  // Smaller marker size
+                    color: 'blue'
+                }).addTo(map);
+            });
+        }
+
+        // Convert drawn items to GeoJSON and transform coordinates
+        var geojson = drawnItems.toGeoJSON();
+
+        // Flip the y-axis (assuming the map height is 1000)
+        var transformedGeoJson = geojson.features.map(feature => {
+            if (feature.geometry.type === "LineString") {
+                feature.geometry.coordinates = feature.geometry.coordinates.map(coord => {
+                    return [coord[1], coord[0]];
+                });
+            } else if (feature.geometry.type === "Point") {
+                [feature.geometry.coordinates[1], feature.geometry.coordinates[0]] = [feature.geometry.coordinates[0], feature.geometry.coordinates[1]]
+            }
+            return feature;
+        });
+
+        console.log(JSON.stringify(transformedGeoJson));  // Output the transformed JSON object
+    });
+</script>
+
+</body>
+</html>
