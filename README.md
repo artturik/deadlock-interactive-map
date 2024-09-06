@@ -1,5 +1,8 @@
 Deadlock interactive map
 ====
+
+[Map](https://artturik.github.io/deadlock-interactive-map/)
+
 Interactive map built using Leaflet.js. It allows users to visualize paths, strategic zones. The map includes multiple layers with toggle functionality, where users can view different game elements such as lines, objectives, and shops.
 
 Features
