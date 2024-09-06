@@ -1,7 +1,9 @@
-Deadlock interactive map
+Deadlock (Valve) interactive map
 ====
 
 [Deadlock Interactive Map](https://artturik.github.io/deadlock-interactive-map/)
+
+Deadlock (Valve) is a third-person 6v6 shooter which combines hero shooter elements with MOBA-like mechanics.
 
 Interactive map built using Leaflet.js. It allows users to visualize paths, strategic zones. The map includes multiple layers with toggle functionality, where users can view different game elements such as lines, objectives, and shops.
 
